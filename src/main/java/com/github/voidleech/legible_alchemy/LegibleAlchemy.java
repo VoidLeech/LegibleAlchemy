@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 public class LegibleAlchemy
 {
     public static final String MOD_ID = "legible_alchemy";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public LegibleAlchemy()
     {
