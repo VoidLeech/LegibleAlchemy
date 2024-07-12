@@ -73,7 +73,7 @@ public class BrewingRecipeFixer {
             }
             if (recipe.isInput(inputItems[0])){
                 for (Ingredient ingredient : POSSIBLE_INGREDIENTS){
-                    ItemStack[] ingredientItems = input.getItems();
+                    ItemStack[] ingredientItems = ingredient.getItems();
                     if (ingredientItems.length == 0){
                         LegibleAlchemy.LOGGER.warn("Ingredient {} was empty", input);
                         continue;
@@ -86,6 +86,9 @@ public class BrewingRecipeFixer {
         }
         if (validIngredientPairings.size() != old){
             LegibleAlchemy.LOGGER.info("Found {} brewing recipes", validIngredientPairings.size() - old);
+        }
+        else{
+            LegibleAlchemy.LOGGER.info("Didn't find brewing recipe");
         }
     }
 }
