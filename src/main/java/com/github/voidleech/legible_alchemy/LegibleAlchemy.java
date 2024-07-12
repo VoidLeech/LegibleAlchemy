@@ -1,9 +1,11 @@
 package com.github.voidleech.legible_alchemy;
 
+import com.github.voidleech.legible_alchemy.fixer.BrewingRecipeFixer;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -23,9 +25,10 @@ public class LegibleAlchemy
     public LegibleAlchemy()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
+
+        //modEventBus.addListener(EventPriority.LOWEST, BrewingRecipeFixer::fixRecipes);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LegibleAlchemyConfig.SPEC);
     }
