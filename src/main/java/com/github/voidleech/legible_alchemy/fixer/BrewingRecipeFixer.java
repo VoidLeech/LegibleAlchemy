@@ -32,24 +32,20 @@ public class BrewingRecipeFixer {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void fixRecipes(FMLCommonSetupEvent event) throws InterruptedException {
         LegibleAlchemy.LOGGER.info("Taking a nap because EventPriority seemingly cannot be trusted");
-        Thread.sleep(4000);
+        Thread.sleep(2000);
         LegibleAlchemy.LOGGER.info("Done sleeping");
+        LegibleAlchemy.LOGGER.debug("Item Registry contains {} items", ForgeRegistries.ITEMS.getValues().size());
+        for (Item item : ForgeRegistries.ITEMS.getValues()){
+            POSSIBLE_INGREDIENTS.add(Ingredient.of(item));
+        }
+        LegibleAlchemy.LOGGER.debug("Potion Registry contains {} potion", ForgeRegistries.POTIONS.getValues().size());
+        for (Potion potion : ForgeRegistries.POTIONS.getValues()){
+            POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), potion)));
+            POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.SPLASH_POTION.getDefaultInstance(), potion)));
+            POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.LINGERING_POTION.getDefaultInstance(), potion)));
+        }
         event.enqueueWork(() -> {
-            if (FAULTY_RECIPES.isEmpty()) {
-                LegibleAlchemy.LOGGER.debug("No brewing recipes to fix");
-                return;
-            }
-            LegibleAlchemy.LOGGER.debug("Attempting to find recipes for {} faulty brewing recipes", FAULTY_RECIPES.size());
-            LegibleAlchemy.LOGGER.debug("Item Registry contains {} items", ForgeRegistries.ITEMS.getValues().size());
-            for (Item item : ForgeRegistries.ITEMS.getValues()){
-                POSSIBLE_INGREDIENTS.add(Ingredient.of(item));
-            }
-            LegibleAlchemy.LOGGER.debug("Potion Registry contains {} potion", ForgeRegistries.POTIONS.getValues().size());
-            for (Potion potion : ForgeRegistries.POTIONS.getValues()){
-                POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), potion)));
-                POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.SPLASH_POTION.getDefaultInstance(), potion)));
-                POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.LINGERING_POTION.getDefaultInstance(), potion)));
-            }
+            LegibleAlchemy.LOGGER.info("Attempting to find recipes for {} faulty brewing recipes", FAULTY_RECIPES.size());
             final Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings = new HashSet<>();
             for (IBrewingRecipe recipe : FAULTY_RECIPES){
                 tryFindRecipe(validIngredientPairings, recipe);
@@ -68,17 +64,19 @@ public class BrewingRecipeFixer {
         for (Ingredient input : POSSIBLE_INGREDIENTS){
             ItemStack[] inputItems = input.getItems();
             if (inputItems.length == 0){
-                LegibleAlchemy.LOGGER.warn("Input {} was empty", input);
+                LegibleAlchemy.LOGGER.debug("Input {} was empty", input);
                 continue;
             }
             if (recipe.isInput(inputItems[0])){
+                LegibleAlchemy.LOGGER.info("Found input for {}", recipe.getClass().descriptorString());
                 for (Ingredient ingredient : POSSIBLE_INGREDIENTS){
                     ItemStack[] ingredientItems = ingredient.getItems();
                     if (ingredientItems.length == 0){
-                        LegibleAlchemy.LOGGER.warn("Ingredient {} was empty", input);
+                        LegibleAlchemy.LOGGER.debug("Ingredient {} was empty", input);
                         continue;
                     }
                     if (recipe.isIngredient(ingredientItems[0])){
+                        LegibleAlchemy.LOGGER.info("Found matching ingredient");
                         validIngredientPairings.add(new Tuple<>(recipe, new Tuple<>(input, ingredient)));
                     }
                 }
@@ -87,8 +85,8 @@ public class BrewingRecipeFixer {
         if (validIngredientPairings.size() != old){
             LegibleAlchemy.LOGGER.info("Found {} brewing recipes", validIngredientPairings.size() - old);
         }
-        else{
-            LegibleAlchemy.LOGGER.info("Didn't find brewing recipe");
+        else {
+            LegibleAlchemy.LOGGER.warn("Couldn't find brewing recipe for {}. Report to Legible Alchemy", recipe.getClass().descriptorString());
         }
     }
 }
