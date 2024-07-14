@@ -1,12 +1,14 @@
 package com.github.voidleech.legible_alchemy.fixer;
 
 import com.github.voidleech.legible_alchemy.LegibleAlchemy;
+import com.github.voidleech.legible_alchemy.LegibleAlchemyConfig;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.brewing.BrewingRecipe;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
@@ -15,7 +17,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -31,15 +32,17 @@ public class BrewingRecipeFixer {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void fixRecipes(FMLCommonSetupEvent event) throws InterruptedException {
-        LegibleAlchemy.LOGGER.info("Taking a nap because EventPriority seemingly cannot be trusted");
-        Thread.sleep(2000);
+        LegibleAlchemy.LOGGER.info("Taking a nap because EventPriority cannot be trusted");
+        Thread.sleep(LegibleAlchemyConfig.timeToSleep);
         LegibleAlchemy.LOGGER.info("Done sleeping");
-        LegibleAlchemy.LOGGER.debug("Item Registry contains {} items", ForgeRegistries.ITEMS.getValues().size());
+        List<Item> skippedItems = List.of(new Item[]{Items.AIR, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION});
+        //skipModItems(skippedItems);
         for (Item item : ForgeRegistries.ITEMS.getValues()){
+            if (skippedItems.contains(item)){ continue; }
             POSSIBLE_INGREDIENTS.add(Ingredient.of(item));
         }
-        LegibleAlchemy.LOGGER.debug("Potion Registry contains {} potion", ForgeRegistries.POTIONS.getValues().size());
         for (Potion potion : ForgeRegistries.POTIONS.getValues()){
+            if (potion == Potions.EMPTY) { continue; }
             POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), potion)));
             POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.SPLASH_POTION.getDefaultInstance(), potion)));
             POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.LINGERING_POTION.getDefaultInstance(), potion)));
@@ -48,7 +51,10 @@ public class BrewingRecipeFixer {
             LegibleAlchemy.LOGGER.info("Attempting to find recipes for {} faulty brewing recipes", FAULTY_RECIPES.size());
             final Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings = new HashSet<>();
             for (IBrewingRecipe recipe : FAULTY_RECIPES){
-                tryFindRecipe(validIngredientPairings, recipe);
+                if (!tryFindRecipe(validIngredientPairings, recipe)){
+                    // Couldn't brute force the recipe, let it through to not break anything
+                    BrewingRecipeRegistry.addRecipe(recipe);
+                }
             }
             for (Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>> tuple : validIngredientPairings){
                 Ingredient input = tuple.getB().getA();
@@ -59,24 +65,30 @@ public class BrewingRecipeFixer {
         });
     }
 
-    private static void tryFindRecipe(Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings, IBrewingRecipe recipe) {
+    private static void skipModItems(List<Item> skippedItems) {
+    }
+
+    /**
+     * @param validIngredientPairings the set to insert brute-forced recipes into
+     * @param recipe the recipe to brute force recipes for
+     * @return whether any valid recipe(s) was/were found. It's possible not all recipes were brute-forced due to nonstandard ingredient types
+     */
+    private static boolean tryFindRecipe(Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings, IBrewingRecipe recipe) {
         int old = validIngredientPairings.size();
         for (Ingredient input : POSSIBLE_INGREDIENTS){
             ItemStack[] inputItems = input.getItems();
             if (inputItems.length == 0){
-                LegibleAlchemy.LOGGER.debug("Input {} was empty", input);
                 continue;
             }
             if (recipe.isInput(inputItems[0])){
-                LegibleAlchemy.LOGGER.info("Found input for {}", recipe.getClass().descriptorString());
+                LegibleAlchemy.LOGGER.debug("Found input for {}", recipe.getClass().descriptorString());
                 for (Ingredient ingredient : POSSIBLE_INGREDIENTS){
                     ItemStack[] ingredientItems = ingredient.getItems();
                     if (ingredientItems.length == 0){
-                        LegibleAlchemy.LOGGER.debug("Ingredient {} was empty", input);
                         continue;
                     }
                     if (recipe.isIngredient(ingredientItems[0])){
-                        LegibleAlchemy.LOGGER.info("Found matching ingredient");
+                        LegibleAlchemy.LOGGER.debug("Found matching ingredient");
                         validIngredientPairings.add(new Tuple<>(recipe, new Tuple<>(input, ingredient)));
                     }
                 }
@@ -84,9 +96,9 @@ public class BrewingRecipeFixer {
         }
         if (validIngredientPairings.size() != old){
             LegibleAlchemy.LOGGER.info("Found {} brewing recipes", validIngredientPairings.size() - old);
+            return true;
         }
-        else {
-            LegibleAlchemy.LOGGER.warn("Couldn't find brewing recipe for {}. Report to Legible Alchemy", recipe.getClass().descriptorString());
-        }
+        LegibleAlchemy.LOGGER.error("Couldn't find brewing recipe for {}. Report to Legible Alchemy", recipe.getClass().descriptorString());
+        return false;
     }
 }

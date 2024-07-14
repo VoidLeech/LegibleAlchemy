@@ -28,8 +28,6 @@ public class LegibleAlchemy
 
         MinecraftForge.EVENT_BUS.register(this);
 
-        //modEventBus.addListener(EventPriority.LOWEST, BrewingRecipeFixer::fixRecipes);
-
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LegibleAlchemyConfig.SPEC);
     }
 
