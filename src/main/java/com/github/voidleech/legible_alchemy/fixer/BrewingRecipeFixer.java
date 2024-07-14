@@ -25,6 +25,11 @@ import java.util.*;
 public class BrewingRecipeFixer {
     private static final Set<IBrewingRecipe> FAULTY_RECIPES = Collections.synchronizedSet(new HashSet<>());
     private static final List<Ingredient> POSSIBLE_INGREDIENTS = new ArrayList<>();
+    private static final List<Item> SKIPPED_ITEMS = new ArrayList<>();
+
+    static {
+        SKIPPED_ITEMS.addAll(List.of(new Item[]{Items.AIR, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION}));
+    }
 
     public static void addRecipe(IBrewingRecipe recipe){
         FAULTY_RECIPES.add(recipe);
@@ -35,10 +40,9 @@ public class BrewingRecipeFixer {
         LegibleAlchemy.LOGGER.info("Taking a nap because EventPriority cannot be trusted");
         Thread.sleep(LegibleAlchemyConfig.timeToSleep);
         LegibleAlchemy.LOGGER.info("Done sleeping");
-        List<Item> skippedItems = List.of(new Item[]{Items.AIR, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION});
-        //skipModItems(skippedItems);
+        //skipModItems();
         for (Item item : ForgeRegistries.ITEMS.getValues()){
-            if (skippedItems.contains(item)){ continue; }
+            if (SKIPPED_ITEMS.contains(item)){ continue; }
             POSSIBLE_INGREDIENTS.add(Ingredient.of(item));
         }
         for (Potion potion : ForgeRegistries.POTIONS.getValues()){
@@ -65,7 +69,13 @@ public class BrewingRecipeFixer {
         });
     }
 
-    private static void skipModItems(List<Item> skippedItems) {
+    /**
+     * For adding `if isModInstalled then call compat method` (that must exist in a separate file)
+     * to add more items to skip in brute-forcing (such as TiC potion buckets that make no sense to have without potion nbt)
+     */
+    private static void skipModItems() {
+        List<Item> modItemsToSkip = new ArrayList<>();
+        SKIPPED_ITEMS.addAll(modItemsToSkip);
     }
 
     /**
@@ -75,20 +85,13 @@ public class BrewingRecipeFixer {
      */
     private static boolean tryFindRecipe(Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings, IBrewingRecipe recipe) {
         int old = validIngredientPairings.size();
+        LegibleAlchemy.LOGGER.info("Attempting to find recipe for {}", recipe.getClass().descriptorString());
         for (Ingredient input : POSSIBLE_INGREDIENTS){
             ItemStack[] inputItems = input.getItems();
-            if (inputItems.length == 0){
-                continue;
-            }
             if (recipe.isInput(inputItems[0])){
-                LegibleAlchemy.LOGGER.debug("Found input for {}", recipe.getClass().descriptorString());
                 for (Ingredient ingredient : POSSIBLE_INGREDIENTS){
                     ItemStack[] ingredientItems = ingredient.getItems();
-                    if (ingredientItems.length == 0){
-                        continue;
-                    }
                     if (recipe.isIngredient(ingredientItems[0])){
-                        LegibleAlchemy.LOGGER.debug("Found matching ingredient");
                         validIngredientPairings.add(new Tuple<>(recipe, new Tuple<>(input, ingredient)));
                     }
                 }
