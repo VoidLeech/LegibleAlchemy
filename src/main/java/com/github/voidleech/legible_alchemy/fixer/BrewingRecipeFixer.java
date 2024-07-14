@@ -23,6 +23,7 @@ import java.util.*;
 
 @Mod.EventBusSubscriber(modid = LegibleAlchemy.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BrewingRecipeFixer {
+    // Adding recipes *should* only be done in a thread-safe, but you never know what someone else does
     private static final Set<IBrewingRecipe> FAULTY_RECIPES = Collections.synchronizedSet(new HashSet<>());
     private static final List<Ingredient> POSSIBLE_INGREDIENTS = new ArrayList<>();
     private static final List<Item> SKIPPED_ITEMS = new ArrayList<>();

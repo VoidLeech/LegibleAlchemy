@@ -15,7 +15,6 @@ public class BrewingRecipeRegistryMixin {
     @WrapMethod(method = "addRecipe(Lnet/minecraftforge/common/brewing/IBrewingRecipe;)Z", remap = false)
     private static boolean la$spotFaultyRecipes(IBrewingRecipe recipe, Operation<Boolean> original){
         if (!(recipe instanceof BrewingRecipe) && !(recipe instanceof VanillaBrewingRecipe)) {
-            // Loop over items/potions to find recipes
             LegibleAlchemy.LOGGER.debug("Lossy brewing recipe in {}", recipe.getClass());
             BrewingRecipeFixer.addRecipe(recipe);
             return false;
