@@ -1,4 +1,4 @@
-The following files and directories, and any files or subdirectories therein, are released under the following license.
+The following files and directories, and any files or subdirectories therein, are released under the following license:
 
 src/main/resources/la-icon.png
 src/main/resources/assets/
@@ -8,7 +8,7 @@ Copyright (c) 2024 VoidLeech
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-All other files in the project are released under the following license (MIT):
+All other files in the project are released under the following (MIT) license:
 
 Copyright (c) 2024 VoidLeech
 
