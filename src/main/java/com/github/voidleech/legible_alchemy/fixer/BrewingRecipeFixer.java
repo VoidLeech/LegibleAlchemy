@@ -28,8 +28,14 @@ public class BrewingRecipeFixer {
     private static final List<Ingredient> POSSIBLE_INGREDIENTS = new ArrayList<>();
     private static final List<Item> SKIPPED_ITEMS = new ArrayList<>();
 
+    private static boolean DID_BRUTE_FORCING = false;
+
     static {
         SKIPPED_ITEMS.addAll(List.of(new Item[]{Items.AIR, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION}));
+    }
+
+    public static boolean didBruteForcing(){
+        return DID_BRUTE_FORCING;
     }
 
     public static void addRecipe(IBrewingRecipe recipe){
@@ -61,6 +67,7 @@ public class BrewingRecipeFixer {
                     BrewingRecipeRegistry.addRecipe(recipe);
                 }
             }
+            DID_BRUTE_FORCING = true;
             for (Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>> tuple : validIngredientPairings){
                 Ingredient input = tuple.getB().getA();
                 Ingredient ingredient = tuple.getB().getB();
