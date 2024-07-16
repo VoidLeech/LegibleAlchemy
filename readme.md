@@ -40,3 +40,6 @@ A: Yes to 1.20.4 and 1.21 (and future later releases), provided the issue is pre
 
 **Q: Can this be used in my modpack?**
 A: Yes.
+
+### Licensing
+This project is released under a [VL Art-Excluding MIT license](LICENSE)
