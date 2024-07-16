@@ -23,7 +23,7 @@ public class BrewingRecipeRegistryMixin {
         if (!BrewingRecipeFixer.didBruteForcing()){ // Don't intercept recipes after we've done brute-forcing, because they'll never get re-added in that case
             if (!(recipe instanceof BrewingRecipe) && !(recipe instanceof VanillaBrewingRecipe)) {
                 String badClass = recipe.getClass().descriptorString();
-                if (la$knownBadRecipeClasses.contains(badClass)) {
+                if (!la$knownBadRecipeClasses.contains(badClass)) {
                     la$knownBadRecipeClasses.add(badClass);
                     LegibleAlchemy.LOGGER.debug("Lossy brewing recipe in {}", badClass);
                 }
