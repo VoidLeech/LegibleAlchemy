@@ -1,4 +1,8 @@
 # Legible Alchemy
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/legible-alchemy?style=flat&logo=modrinth&label=Modrinth)](https://modrinth.com/mod/legible-alchemy)
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1064523?style=flat&logo=curseforge&label=Curseforge)](https://www.curseforge.com/minecraft/mc-mods/legible-alchemy)
+![Modrinth Game Versions](https://cf.way2muchnoise.eu/versions/1064523.svg)
+
 A mod that tries to fix certain potion recipes not showing up in recipe viewers.
 
 ---
