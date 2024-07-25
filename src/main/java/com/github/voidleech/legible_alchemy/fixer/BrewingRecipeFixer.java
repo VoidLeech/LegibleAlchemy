@@ -23,19 +23,20 @@ import java.util.*;
 
 @Mod.EventBusSubscriber(modid = LegibleAlchemy.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BrewingRecipeFixer {
-    // Adding recipes *should* only be done in a thread-safe, but you never know what someone else does
-    private static final Set<IBrewingRecipe> FAULTY_RECIPES = Collections.synchronizedSet(new HashSet<>());
-    private static final List<Ingredient> POSSIBLE_INGREDIENTS = new ArrayList<>();
-    private static final List<Item> SKIPPED_ITEMS = new ArrayList<>();
+    // Adding brewing recipes isn't thread-safe, so you'd hope wrapping this in a synchronizedSet isn't necessary,
+    // but you never know what another mod does; see also: the reason for this mod to exist to begin with
+    private static Set<IBrewingRecipe> FAULTY_RECIPES = Collections.synchronizedSet(new HashSet<>());
+    private static List<Ingredient> POSSIBLE_INGREDIENTS = new ArrayList<>();
+    private static List<Item> SKIPPED_ITEMS = new ArrayList<>();
 
-    private static boolean DID_BRUTE_FORCING = false;
+    private static boolean STARTED_BRUTE_FORCING = false;
 
     static {
         SKIPPED_ITEMS.addAll(List.of(new Item[]{Items.AIR, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION}));
     }
 
-    public static boolean didBruteForcing(){
-        return DID_BRUTE_FORCING;
+    public static boolean startedBruteForcing(){
+        return STARTED_BRUTE_FORCING;
     }
 
     public static void addRecipe(IBrewingRecipe recipe){
@@ -53,27 +54,31 @@ public class BrewingRecipeFixer {
             POSSIBLE_INGREDIENTS.add(Ingredient.of(item));
         }
         for (Potion potion : ForgeRegistries.POTIONS.getValues()){
-            if (potion == Potions.EMPTY) { continue; }
+            if (potion == Potions.EMPTY){ continue; }
             POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), potion)));
             POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.SPLASH_POTION.getDefaultInstance(), potion)));
             POSSIBLE_INGREDIENTS.add(Ingredient.of(PotionUtils.setPotion(Items.LINGERING_POTION.getDefaultInstance(), potion)));
         }
         event.enqueueWork(() -> {
             LegibleAlchemy.LOGGER.info("Attempting to find recipes for {} faulty brewing recipes", FAULTY_RECIPES.size());
-            final Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings = new HashSet<>();
+            STARTED_BRUTE_FORCING = true;
+            Set<Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>>> validIngredientPairings = new HashSet<>();
             for (IBrewingRecipe recipe : FAULTY_RECIPES){
                 if (!tryFindRecipe(validIngredientPairings, recipe)){
                     // Couldn't brute force the recipe, let it through to not break anything
                     BrewingRecipeRegistry.addRecipe(recipe);
                 }
             }
-            DID_BRUTE_FORCING = true;
             for (Tuple<IBrewingRecipe, Tuple<Ingredient, Ingredient>> tuple : validIngredientPairings){
                 Ingredient input = tuple.getB().getA();
                 Ingredient ingredient = tuple.getB().getB();
                 BrewingRecipe correctedRecipe = new BrewingRecipe(input, ingredient, tuple.getA().getOutput(input.getItems()[0], ingredient.getItems()[0]));
                 BrewingRecipeRegistry.addRecipe(correctedRecipe);
             }
+            // Free up memory
+            FAULTY_RECIPES = null;
+            POSSIBLE_INGREDIENTS = null;
+            SKIPPED_ITEMS = null;
         });
     }
 
@@ -81,10 +86,10 @@ public class BrewingRecipeFixer {
      * For adding `if isModInstalled then call compat method` (that must exist in a separate file)
      * to add more items to skip in brute-forcing (such as TiC potion buckets that make no sense to have without potion nbt)
      */
-    private static void skipModItems() {
+    /*private static void skipModItems() {
         List<Item> modItemsToSkip = new ArrayList<>();
         SKIPPED_ITEMS.addAll(modItemsToSkip);
-    }
+    }*/
 
     /**
      * @param validIngredientPairings the set to insert brute-forced recipes into

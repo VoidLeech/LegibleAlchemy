@@ -20,7 +20,7 @@ public class BrewingRecipeRegistryMixin {
     private static final Set<String> la$knownBadRecipeClasses = new HashSet<>();
     @WrapMethod(method = "addRecipe(Lnet/minecraftforge/common/brewing/IBrewingRecipe;)Z", remap = false)
     private static boolean la$spotFaultyRecipes(IBrewingRecipe recipe, Operation<Boolean> original){
-        if (!BrewingRecipeFixer.didBruteForcing()){ // Don't intercept recipes after we've done brute-forcing, because they'll never get re-added in that case
+        if (!BrewingRecipeFixer.startedBruteForcing()){ // Don't intercept recipes after we've done brute-forcing, because they'll never get re-added in that case
             if (!(recipe instanceof BrewingRecipe) && !(recipe instanceof VanillaBrewingRecipe)) {
                 String badClass = recipe.getClass().descriptorString();
                 if (!la$knownBadRecipeClasses.contains(badClass)) {
