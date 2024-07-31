@@ -42,7 +42,7 @@ A: Please make an issue for the affected mod. We can look at the recipe it adds 
 **Q: Will you be porting to Loader/X.x.x?**  
 A: Yes to 1.20.4 and 1.21 (and future later releases), provided the issue is present on the loader. Past 1.20.1, I'll support Neoforged instead of Forge. I will check whether this is still a possible issue on Neoforged, as those are based on Forge (and the former currently has MCreator support). I'm not too familiar with Fabric, but I don't think it supports item inputs, only potions, and so this issue shouldn't exist on Fabric to begin with.
 
-**Q: Can this be used in my modpack?**  
+**Q: Can this be used in my CurseForge/Modrinth modpack?**  
 A: Yes.
 
 ### Licensing
