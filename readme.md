@@ -26,7 +26,7 @@ These found input-ingredient pairings then get added as proper BrewingRecipes.
 If we can't find any pairings, that means there's some complex ingredient we don't cover yet and we just add the recipe as-is to not break anything. We log an error in the hope someone will report it.
 
 ### What mods does this effect?
-There's one main contributor to the proliferation of these recipes: MCreator. Someone else has made a [plugin](https://mcreator.net/plugin/103347/just-enough-recipes) that fixes this on the dev end of an MCreator mod, but that of course doesn't catch mods not using the plugin.  
+There's one main contributor to the proliferation of these recipes: MCreator. Someone else has made a [plugin](https://mcreator.net/plugin/103347/just-enough-recipes) that fixes this on the dev end of an MCreator mod, but that of course doesn't catch mods not using the plugin, and apparently still doesn't do it in a way that mods other adding potion recipe can use them.  
 There's also some non-MCreator mods that have such recipes: Ecologics, Naturalist (probably not an exhaustive list)
 
 ### F.A.Q.
