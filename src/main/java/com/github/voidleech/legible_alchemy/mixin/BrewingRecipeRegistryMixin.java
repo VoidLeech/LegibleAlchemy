@@ -17,14 +17,14 @@ import java.util.Set;
 @Mixin(BrewingRecipeRegistry.class)
 public class BrewingRecipeRegistryMixin {
     @Unique
-    private static final Set<String> la$knownBadRecipeClasses = new HashSet<>();
+    private static final Set<String> legible_alchemy$knownBadRecipeClasses = new HashSet<>();
     @WrapMethod(method = "addRecipe(Lnet/minecraftforge/common/brewing/IBrewingRecipe;)Z", remap = false)
-    private static boolean la$spotFaultyRecipes(IBrewingRecipe recipe, Operation<Boolean> original){
+    private static boolean legible_alchemy$spotFaultyRecipes(IBrewingRecipe recipe, Operation<Boolean> original){
         if (!BrewingRecipeFixer.startedBruteForcing()){ // Don't intercept recipes after we've done brute-forcing, because they'll never get re-added in that case
             if (!(recipe instanceof BrewingRecipe) && !(recipe instanceof VanillaBrewingRecipe)) {
                 String badClass = recipe.getClass().descriptorString();
-                if (!la$knownBadRecipeClasses.contains(badClass)) {
-                    la$knownBadRecipeClasses.add(badClass);
+                if (!legible_alchemy$knownBadRecipeClasses.contains(badClass)) {
+                    legible_alchemy$knownBadRecipeClasses.add(badClass);
                     LegibleAlchemy.LOGGER.debug("Lossy brewing recipe in {}", badClass);
                 }
                 BrewingRecipeFixer.addRecipe(recipe);

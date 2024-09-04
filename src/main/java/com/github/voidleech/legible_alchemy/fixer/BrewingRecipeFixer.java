@@ -44,9 +44,14 @@ public class BrewingRecipeFixer {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void fixRecipes(FMLCommonSetupEvent event) throws InterruptedException {
+    public static void fixRecipes(FMLCommonSetupEvent event) {
         LegibleAlchemy.LOGGER.info("Taking a nap because EventPriority cannot be trusted");
-        Thread.sleep(LegibleAlchemyConfig.timeToSleep);
+        try {
+            Thread.sleep(LegibleAlchemyConfig.timeToSleep);
+        }
+        catch (InterruptedException weDontKnowHowLongWeSlept){
+            LegibleAlchemy.LOGGER.error("Abruptly woken up from sleeping. Not all bad potion recipes might've been caught.");
+        }
         LegibleAlchemy.LOGGER.info("Done sleeping");
         //skipModItems();
         for (Item item : ForgeRegistries.ITEMS.getValues()){
